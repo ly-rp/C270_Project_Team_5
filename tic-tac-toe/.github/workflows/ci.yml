@@ -14,7 +14,7 @@ jobs:
 
       - name: Verify project files
         run: |
-          test -f index.html
+          test -f templates/index.html
           test -f static/style.css
           test -f static/script.js
 
