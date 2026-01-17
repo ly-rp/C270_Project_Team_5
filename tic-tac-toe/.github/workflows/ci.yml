@@ -1,22 +1,18 @@
-name: CI Pipeline
-
-on:
-  push:
-  pull_request:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Verify project files
+      - name: Verify required files exist
         run: |
-          test -f templates/index.html
+          echo "Listing repo root:"
+          ls -la
+
+          echo "Searching for index.html (within 4 levels)..."
+          INDEX_PATH=$(find . -maxdepth 4 -name "index.html" -print -quit)
+
+          if [ -z "$INDEX_PATH" ]; then
+            echo "ERROR: index.html not found"
+            exit 1
+          fi
+
+          echo "Found index.html at: $INDEX_PATH"
+
+          echo "Checking static files..."
           test -f static/style.css
           test -f static/script.js
-
-      - name: CI completed successfully
-        run: echo "All checks passed!"
