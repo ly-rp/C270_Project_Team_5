@@ -1,3 +1,4 @@
+# Trigger CI run
       - name: Verify required files exist
         run: |
           echo "Listing repo root:"
