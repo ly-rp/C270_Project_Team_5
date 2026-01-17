@@ -1,5 +1,3 @@
-
-
 const cells = document.querySelectorAll(".cell");
 const statusText = document.getElementById("status");
 const themeToggle = document.getElementById("theme-toggle");
@@ -130,4 +128,12 @@ window.onload = () => {
 modeSelect.addEventListener("change", () => {
   mode = modeSelect.value;
   resetGame();
+});
+
+document.getElementById("settings-btn").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
 });
