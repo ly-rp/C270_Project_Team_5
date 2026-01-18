@@ -209,3 +209,114 @@ body.dark #leaderboard-panel {
 .hidden {
   display: none !important;
 }
+
+/* ===== LEADERBOARD PANEL (COLOR INVERTED) ===== */
+#leaderboard-panel {
+  position: fixed;
+  top: 120px;
+  left: 50px;
+  width: 320px;
+  padding: 16px;
+  border-radius: 12px;
+
+  /* 🌞 LIGHT MODE = BLACK */
+  background: #000000;
+  color: #ffffff;
+
+  z-index: 9998;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* 🌙 DARK MODE = WHITE */
+body.dark #leaderboard-panel {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Title */
+#leaderboard-panel h3 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* List */
+#leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Each row */
+.lb-item {
+  display: grid;
+  grid-template-columns: 32px 1fr 60px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  /* Light mode row */
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Dark mode row */
+body.dark .lb-item {
+  background: #f2f2f2;
+}
+
+/* Rank circle default */
+.lb-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #888;
+  color: #000;
+}
+
+/* Name + score default */
+.lb-name,
+.lb-score {
+  font-weight: normal;
+}
+
+/* ===== 🥇🥈🥉 TOP 3 ===== */
+
+/* GOLD */
+.lb-item:nth-child(1) .lb-rank {
+  background: #ffd700;
+}
+.lb-item:nth-child(1) .lb-name,
+.lb-item:nth-child(1) .lb-score {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+/* SILVER */
+.lb-item:nth-child(2) .lb-rank {
+  background: #c0c0c0;
+}
+.lb-item:nth-child(2) .lb-name,
+.lb-item:nth-child(2) .lb-score {
+  font-weight: bold;
+  color: #c0c0c0;
+}
+
+/* BRONZE */
+.lb-item:nth-child(3) .lb-rank {
+  background: #cd7f32;
+}
+.lb-item:nth-child(3) .lb-name,
+.lb-item:nth-child(3) .lb-score {
+  font-weight: bold;
+  color: #cd7f32;
+}
+
+/* Hidden helper */
+.hidden {
+  display: none !important;
+}

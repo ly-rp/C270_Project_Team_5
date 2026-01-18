@@ -8,42 +8,85 @@ const settingsPanel = document.getElementById("settings-panel");
 
 const leaderboardBtn = document.getElementById("leaderboard-btn");
 const leaderboardPanel = document.getElementById("leaderboard-panel");
+const leaderboardList = document.getElementById("leaderboard-list");
 
-/* ================= PANEL TOGGLE (INDEPENDENT) ================= */
+/* ================= LEADERBOARD (DEMO) ================= */
 
-settingsBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  settingsPanel.classList.toggle("hidden");
-});
+// Demo data (replace later with DB/MySQL)
+let leaderboardData = [
+  { name: "Kim Namjoon", best: 3126 },
+  { name: "Kim Seokjin", best: 2864 },
+  { name: "Min Yoongi", best: 2021 },
+  { name: "Jung Hoseok", best: 1796 },
+  { name: "Park Jimin", best: 1642 },
+  { name: "Kim Taehyung", best: 1627 },
+  { name: "Jeon Jungkook", best: 1555 }
+];
 
-leaderboardBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  leaderboardPanel.classList.toggle("hidden");
-});
+function renderLeaderboard() {
+  if (!leaderboardList) return;
 
-// click outside closes BOTH
+  const data = [...leaderboardData].sort((a, b) => b.best - a.best).slice(0, 10);
+
+  leaderboardList.innerHTML = data
+    .map((row, i) => {
+      return `
+        <div class="lb-item">
+          <div class="lb-rank">${i + 1}</div>
+          <div class="lb-name">${row.name}</div>
+          <div class="lb-score">${row.best}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+/* ================= PANEL TOGGLE (MANUAL CONTROL) ================= */
+
+function hidePanelsOnStart() {
+  if (settingsPanel) settingsPanel.classList.add("hidden");
+  if (leaderboardPanel) leaderboardPanel.classList.add("hidden");
+}
+
+// Toggle settings (does NOT auto-close leaderboard)
+if (settingsBtn && settingsPanel) {
+  settingsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    settingsPanel.classList.toggle("hidden");
+  });
+
+  settingsPanel.addEventListener("click", (e) => e.stopPropagation());
+}
+
+// Toggle leaderboard (does NOT auto-close settings)
+if (leaderboardBtn && leaderboardPanel) {
+  leaderboardBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    leaderboardPanel.classList.toggle("hidden");
+  });
+
+  leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
+}
+
+// Clicking outside closes BOTH
 document.addEventListener("click", () => {
-  settingsPanel.classList.add("hidden");
-  leaderboardPanel.classList.add("hidden");
+  if (settingsPanel) settingsPanel.classList.add("hidden");
+  if (leaderboardPanel) leaderboardPanel.classList.add("hidden");
 });
-
-// prevent clicks inside panels from closing them
-settingsPanel.addEventListener("click", (e) => e.stopPropagation());
-leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
 
 /* ================= GAME STATE ================= */
 
 let board = ["", "", "", "", "", "", "", "", ""];
 let currentPlayer = "X";
 let gameActive = true;
-let mode = modeSelect.value;
+let mode = modeSelect ? modeSelect.value : "2p";
 
 /* ================= WIN CONDITIONS ================= */
 
 const winningThreeCombinations = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
+  [0, 1, 2],[3, 4, 5],[6, 7, 8],
+  [0, 3, 6],[1, 4, 7],[2, 5, 8],
+  [0, 4, 8],[2, 4, 6]
 ];
 
 /* ================= SCOREBOARD ================= */
@@ -51,14 +94,20 @@ const winningThreeCombinations = [
 let scores = { player: 0, computer: 0, tie: 0 };
 
 function updateScoreboard() {
-  document.getElementById("player-score").textContent = scores.player;
-  document.getElementById("computer-score").textContent = scores.computer;
-  document.getElementById("tie-score").textContent = scores.tie;
+  const p = document.getElementById("player-score");
+  const c = document.getElementById("computer-score");
+  const t = document.getElementById("tie-score");
+  if (!p || !c || !t) return;
+
+  p.textContent = scores.player;
+  c.textContent = scores.computer;
+  t.textContent = scores.tie;
 }
 
 function updateScoreLabels() {
   const leftLabel = document.getElementById("left-label");
   const rightLabel = document.getElementById("right-label");
+  if (!leftLabel || !rightLabel) return;
 
   if (mode === "bot") {
     leftLabel.textContent = "Player";
@@ -70,6 +119,8 @@ function updateScoreLabels() {
 }
 
 function updateTurnText() {
+  if (!statusText) return;
+
   if (mode === "bot") {
     statusText.textContent =
       currentPlayer === "X" ? "Player X's turn" : "Bot's turn";
@@ -92,29 +143,36 @@ function handleCellClick() {
 
   checkResult();
 
+  // Bot moves only when it's O's turn in bot mode
   if (gameActive && mode === "bot" && currentPlayer === "O") {
-    setTimeout(botMove, 300);
+    setTimeout(botMove, 250);
   }
 }
 
 function checkResult() {
+  // Win
   for (let combo of winningThreeCombinations) {
-    const [a,b,c] = combo;
+    const [a, b, c] = combo;
+
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
       gameActive = false;
 
+      // scoring (both modes)
+      if (currentPlayer === "X") scores.player++;
+      else scores.computer++;
+
       if (mode === "bot") {
-        currentPlayer === "X" ? scores.player++ : scores.computer++;
+        statusText.textContent = currentPlayer === "X" ? "You win!" : "Bot wins!";
       } else {
-        currentPlayer === "X" ? scores.player++ : scores.computer++;
+        statusText.textContent = currentPlayer === "X" ? "Player X wins!" : "Player O wins!";
       }
 
-      statusText.textContent = `Player ${currentPlayer} wins!`;
       updateScoreboard();
       return;
     }
   }
 
+  // Tie
   if (!board.includes("")) {
     gameActive = false;
     scores.tie++;
@@ -123,6 +181,7 @@ function checkResult() {
     return;
   }
 
+  // Switch turn
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   updateTurnText();
 }
@@ -132,7 +191,7 @@ function resetGame() {
   gameActive = true;
   currentPlayer = "X";
   updateTurnText();
-  cells.forEach(cell => cell.textContent = "");
+  cells.forEach(cell => (cell.textContent = ""));
 }
 
 function resetScores() {
@@ -144,8 +203,9 @@ function resetScores() {
 
 function findWinningMove(player) {
   for (let combo of winningThreeCombinations) {
-    const [a,b,c] = combo;
-    const vals = [board[a],board[b],board[c]];
+    const [a, b, c] = combo;
+    const vals = [board[a], board[b], board[c]];
+
     if (vals.filter(v => v === player).length === 2 && vals.includes("")) {
       if (board[a] === "") return a;
       if (board[b] === "") return b;
@@ -157,10 +217,14 @@ function findWinningMove(player) {
 
 function botMove() {
   let move = findWinningMove("O") || findWinningMove("X");
+
   if (move === null) {
-    const empty = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-    move = empty[Math.floor(Math.random()*empty.length)];
+    const empty = board
+      .map((v, i) => (v === "" ? i : null))
+      .filter(v => v !== null);
+    move = empty[Math.floor(Math.random() * empty.length)];
   }
+
   board[move] = "O";
   cells[move].textContent = "O";
   checkResult();
@@ -168,23 +232,27 @@ function botMove() {
 
 /* ================= THEME ================= */
 
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem(
-    "theme",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
-});
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem(
+      "theme",
+      document.body.classList.contains("dark") ? "dark" : "light"
+    );
+  });
+}
 
 /* ================= MODE ================= */
 
-modeSelect.addEventListener("change", () => {
-  mode = modeSelect.value;
-  resetGame();
-  resetScores();
-  updateScoreLabels();
-  updateTurnText();
-});
+if (modeSelect) {
+  modeSelect.addEventListener("change", () => {
+    mode = modeSelect.value;
+    resetGame();
+    resetScores();
+    updateScoreLabels();
+    updateTurnText();
+  });
+}
 
 /* ================= INIT ================= */
 
@@ -192,8 +260,9 @@ window.addEventListener("load", () => {
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
   }
-  settingsPanel.classList.add("hidden");
-  leaderboardPanel.classList.add("hidden");
+
+  hidePanelsOnStart();
+  renderLeaderboard();
   updateScoreLabels();
   updateTurnText();
   updateScoreboard();
