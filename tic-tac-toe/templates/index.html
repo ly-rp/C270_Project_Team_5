@@ -11,6 +11,29 @@
 <body>
     <h1>Tic Tac Toe</h1>
 
+    <!-- Top-right buttons -->
+    <div id="top-right">
+        <button id="leaderboard-btn" title="Leaderboard">🏆</button>
+        <button id="settings-btn" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Leaderboard panel (hidden by default) -->
+    <div id="leaderboard-panel" class="panel hidden">
+        <h3>Weekly Leaderboard</h3>
+
+        <div class="lb-row">
+            <label for="username">Username</label>
+            <input id="username" type="text" placeholder="e.g. ly" maxlength="15" />
+            <button id="save-username">Save</button>
+        </div>
+
+        <p class="lb-note">Tracks your best win score vs Bot (this device only). Resets weekly.</p>
+
+        <div id="leaderboard-list"></div>
+
+        <button id="reset-leaderboard">Reset leaderboard</button>
+    </div>
+
     <!-- ⚙️ Settings button -->
     <button id="settings-btn" title="Settings">⚙️</button>
 
