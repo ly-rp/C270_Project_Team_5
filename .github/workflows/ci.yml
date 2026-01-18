@@ -3,24 +3,30 @@ name: CI Pipeline
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: tic-tac-toe   # CHANGE THIS if your folder name is different
+        working-directory: tic-tac-toe   
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Show folder structure (debug)
         run: |
-          echo "Repo root:"
-          ls -la ..
+          echo "===== Repo root (.) ====="
+          ls -la
           echo ""
-          echo "Working directory:"
+          echo "===== Current working directory ====="
           pwd
           ls -la
 
@@ -32,10 +38,16 @@ jobs:
           test -f static/script.js || (echo "❌ Missing static/script.js" && exit 1)
           echo "✅ All required files exist"
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - name: Validate HTML (templates/index.html)
+        run: npx --yes html-validate@8 templates/index.html
 
       - name: JavaScript syntax check
         run: node --check static/script.js
+
+      # OPTIONAL (recommended): Catch common JS mistakes (undefined vars etc.)
+      - name: ESLint (quick lint)
+        run: npx --yes eslint@9 --no-eslintrc --env browser --rule "no-undef:error" static/script.js
+
+      # OPTIONAL (recommended): Catch invalid CSS / typos
+      - name: Stylelint (quick lint)
+        run: npx --yes stylelint@16 static/style.css
