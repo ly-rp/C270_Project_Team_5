@@ -14,13 +14,13 @@ const leaderboardList = document.getElementById("leaderboard-list");
 
 // Demo data (replace later with DB/MySQL)
 let leaderboardData = [
-  { name: "Kim Namjoon", best: 3126 },
-  { name: "Kim Seokjin", best: 2864 },
-  { name: "Min Yoongi", best: 2021 },
-  { name: "Jung Hoseok", best: 1796 },
-  { name: "Park Jimin", best: 1642 },
-  { name: "Kim Taehyung", best: 1627 },
-  { name: "Jeon Jungkook", best: 1555 }
+  { name: "Player 1", best: 3126 },
+  { name: "Player 2", best: 2864 },
+  { name: "Player 3", best: 2021 },
+  { name: "Player 4", best: 1796 },
+  { name: "Player 5", best: 1642 },
+  { name: "Player 6", best: 1627 },
+  { name: "Player 7", best: 1555 }
 ];
 
 function renderLeaderboard() {
