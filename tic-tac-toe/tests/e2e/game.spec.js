@@ -2,8 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Tic-Tac-Toe E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Assuming the app is running on localhost:3000
-    await page.goto('http://localhost:3000');
+    // Assuming the app is running on localhost:3306
+    await page.goto('http://localhost:3306');
   });
 
   test('should load the game page', async ({ page }) => {

@@ -1,4 +1,5 @@
 import pytest
+from flask import Flask
 from app import app
 
 @pytest.fixture
@@ -20,11 +21,7 @@ def test_home_content(client):
 
 def test_app_imports():
     """Test that all necessary modules can be imported"""
-    try:
-        from flask import Flask
-        assert Flask is not None
-    except ImportError:
-        pytest.fail("Flask import failed")
+    assert Flask is not None
 
 def test_app_creation():
     """Test that the app can be created without errors"""

@@ -2,7 +2,7 @@ FROM python
 
 WORKDIR /C270_Project_Team_5/tic-tac-toe
 
-RUN pip install
+RUN pip install flask
 
 COPY ./static ./static/
 COPY ./templates ./templates/
