@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ] # Only triggers when code is successfully merged into main
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -11,25 +14,86 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Initialize Docker Swarm
+        run: docker swarm init || true
 
-      - name: Build and Push
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('tic-tac-toe/tempdir/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Lint Python Code
+        run: |
+          pip install flake8
+          flake8 tic-tac-toe/app.py --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 tic-tac-toe/app.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Build Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./tic-tac-toe
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tic-tac-toe:latest
+          file: ./tic-tac-toe/tempdir/Dockerfile
+          push: false
+          tags: tttapp:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-      - name: Update Swarm Stack
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Scan Docker Image for Vulnerabilities
+        uses: aquasecurity/trivy-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tic-tac-toe:latest
-            docker stack deploy -c stack.yml tttstack
+          scan-type: 'image'
+          scan-ref: 'tttapp:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Deploy Swarm Stack
+        run: |
+          export IMAGE_TAG=${{ github.sha }}
+          docker stack deploy -c tic-tac-toe/stack.yml tttstack
+
+      - name: Validate Stack Configuration
+        run: docker-compose -f tic-tac-toe/stack.yml config
+
+      - name: Check Stack Status
+        run: docker stack ps tttstack
+
+      - name: Wait for Services to be Ready
+        run: |
+          echo "Waiting for services to be running..."
+          timeout 300 bash -c 'while ! docker stack ps tttstack | grep -q "Running"; do sleep 10; echo "Checking..."; done'
+          echo "Services are running."
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker image prune -f
+          docker system prune -f
+
+      - name: Notify on Success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Image tag: tttapp:${{ github.sha }}"
+          echo "Stack: tttstack"
+          echo "Access the app at http://localhost:3307"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Check the logs above for details."
+          echo "You may need to manually rollback or fix issues."
