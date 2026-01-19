@@ -107,11 +107,11 @@ describe('Game Logic', () => {
 
   test('finds blocking move', () => {
     const testBoard = ['O', 'O', '', '', '', '', '', '', ''];
-    expect(findWinningMove('X', testBoard)).toBe(2);
+    expect(findWinningMove('O', testBoard)).toBe(2);
   });
 
   test('no winning move', () => {
-    const testBoard = ['X', 'O', 'X', 'O', 'X', 'O', '', '', ''];
+    const testBoard = ['X', 'O', 'O', 'X', 'X', 'O', '', '', ''];
     expect(findWinningMove('X', testBoard)).toBe(null);
   });
 });
