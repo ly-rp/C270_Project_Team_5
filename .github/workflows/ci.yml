@@ -46,6 +46,9 @@ jobs:
       - name: Validate HTML (templates/index.html)
         run: npx --yes html-validate@8 templates/index.html
 
+      - name: List files (debug)
+        run: ls -R
+        
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
