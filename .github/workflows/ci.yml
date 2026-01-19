@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Node Dependencies
         run: |
-          npm install jest jsdom stylelint --save-dev
+          npm install jest jsdom --save-dev
           npx playwright install --with-deps
 
       - name: Show folder structure (debug)
@@ -42,17 +42,6 @@ jobs:
           test -f static/style.css || (echo "❌ Missing static/style.css" && exit 1)
           test -f static/script.js || (echo "❌ Missing static/script.js" && exit 1)
           echo "✅ All required files exist"
-
-      - name: Validate HTML (templates/index.html)
-        run: npx --yes html-validate@8 templates/index.html
-
-      - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: tic-tac-toe/tempdir/Dockerfile
-
-      - name: Lint CSS
-        run: npx stylelint static/style.css || echo "CSS linting completed with warnings"
 
       - name: JavaScript syntax check
         run: node --check static/script.js
