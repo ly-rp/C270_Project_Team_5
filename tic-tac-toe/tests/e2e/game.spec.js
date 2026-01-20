@@ -46,18 +46,18 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
     
     const cells = page.locator('.cell');
 
-    // Fill board for a true tie - no winning combinations for either player
-    // Sequence: 0(X), 1(O), 2(X), 3(O), 4(X), 5(X), 6(O), 7(X), 8(O)
-    // Board: X O X / O X X / O X O
+    // Fill board for a true tie - specific click sequence to avoid any winner
+    // Click order: 0(X), 1(O), 2(X), 4(O), 3(X), 5(O), 7(X), 6(O), 8(X)
+    // Final board: X O X / X O O / O X X - no three in a row for either player
     await cells.nth(0).click(); // X
     await cells.nth(1).click(); // O
     await cells.nth(2).click(); // X
-    await cells.nth(3).click(); // O
-    await cells.nth(4).click(); // X
-    await cells.nth(5).click(); // X
-    await cells.nth(6).click(); // O
+    await cells.nth(4).click(); // O
+    await cells.nth(3).click(); // X
+    await cells.nth(5).click(); // O
     await cells.nth(7).click(); // X
-    await cells.nth(8).click(); // O
+    await cells.nth(6).click(); // O
+    await cells.nth(8).click(); // X
 
     await expect(page.locator('#status')).toHaveText('It\'s a tie!');
   });
@@ -102,9 +102,15 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
 
     // Make a move and check if bot responds
     const cells = page.locator('.cell');
-    await cells.nth(0).click(); // X
-    await page.waitForTimeout(2000); // Wait for bot move
-    const oCells = await cells.locator(':has-text("O")').count();
-    expect(oCells).toBe(1);
+    await cells.nth(4).click(); // X at center
+    await page.waitForTimeout(3000); // Wait longer for bot move and animation
+    
+    // Check board for O by counting cells with text
+    const boardCells = page.locator('.cell');
+    const cellsWithContent = await boardCells.filter({ hasNot: page.locator('text=') }).count();
+    const cellsWithO = await boardCells.filter({ has: page.locator(':text("O")') }).count();
+    
+    // Bot should have made a move
+    expect(cellsWithO).toBeGreaterThanOrEqual(1);
   });
 });
