@@ -46,17 +46,18 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
     
     const cells = page.locator('.cell');
 
-    // Fill board for a tie - specific sequence to avoid any winning combination
-    // Board positions (non-winning): X at 0,2,3,6,8 O at 1,4,5,7
+    // Fill board for a true tie - no winning combinations for either player
+    // Sequence: 0(X), 1(O), 2(X), 3(O), 4(X), 5(X), 6(O), 7(X), 8(O)
+    // Board: X O X / O X X / O X O
     await cells.nth(0).click(); // X
     await cells.nth(1).click(); // O
     await cells.nth(2).click(); // X
-    await cells.nth(4).click(); // O
-    await cells.nth(3).click(); // X
-    await cells.nth(5).click(); // O
-    await cells.nth(6).click(); // X
-    await cells.nth(7).click(); // O
-    await cells.nth(8).click(); // X
+    await cells.nth(3).click(); // O
+    await cells.nth(4).click(); // X
+    await cells.nth(5).click(); // X
+    await cells.nth(6).click(); // O
+    await cells.nth(7).click(); // X
+    await cells.nth(8).click(); // O
 
     await expect(page.locator('#status')).toHaveText('It\'s a tie!');
   });
@@ -86,16 +87,14 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
     // Reload page to get fresh game state
     await page.reload();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Extra wait for full render
+    await page.waitForTimeout(500);
+
+    // Open settings panel first (mode-select is inside settings-panel)
+    const settingsBtn = page.locator('#settings-btn');
+    await settingsBtn.click();
+    await page.waitForTimeout(300);
 
     const modeSelect = page.locator('#mode-select');
-    
-    // Scroll to make element visible
-    await modeSelect.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    
-    // Wait for enabled state
-    await modeSelect.waitFor({ state: 'enabled' });
     await modeSelect.selectOption('bot');
     
     await page.waitForTimeout(500); // Wait for mode switch
