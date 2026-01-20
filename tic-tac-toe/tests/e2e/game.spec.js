@@ -42,13 +42,13 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
   test('should detect a tie', async ({ page }) => {
     const cells = page.locator('.cell');
 
-    // Fill board for a tie
+    // Fill board for a tie (X: 0,2,5,6,8 | O: 1,3,4,7)
     await cells.nth(0).click(); // X
     await cells.nth(1).click(); // O
     await cells.nth(2).click(); // X
     await cells.nth(3).click(); // O
-    await cells.nth(4).click(); // X
-    await cells.nth(5).click(); // O
+    await cells.nth(4).click(); // O
+    await cells.nth(5).click(); // X
     await cells.nth(6).click(); // X
     await cells.nth(7).click(); // O
     await cells.nth(8).click(); // X
@@ -78,15 +78,19 @@ test.describe('Tic-Tac-Toe E2E Tests', () => {
   });
 
   test('should switch to bot mode', async ({ page }) => {
-    const modeSelect = page.locator('#mode-select');
+    // Reload page to get fresh game state
+    await page.reload();
+    await page.waitForLoadState('networkidle');
 
+    const modeSelect = page.locator('#mode-select');
+    await modeSelect.waitFor({ state: 'visible' });
     await modeSelect.selectOption('bot');
     await expect(page.locator('#status')).toHaveText('Player X\'s turn');
 
     // Make a move and check if bot responds
     const cells = page.locator('.cell');
     await cells.nth(0).click(); // X
-    await page.waitForTimeout(1000); // Wait for bot move
+    await page.waitForTimeout(1500); // Wait for bot move
     const oCells = await cells.locator(':has-text("O")').count();
     expect(oCells).toBe(1);
   });
