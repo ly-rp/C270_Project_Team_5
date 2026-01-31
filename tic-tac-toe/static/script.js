@@ -10,23 +10,46 @@ const leaderboardBtn = document.getElementById("leaderboard-btn");
 const leaderboardPanel = document.getElementById("leaderboard-panel");
 const leaderboardList = document.getElementById("leaderboard-list");
 
-/* ================= LEADERBOARD (DEMO) ================= */
+/* ================= LEADERBOARD ================= */
+//If the leaderboard is not working when running, please let me know. Errors are common :c -Eleanor
+let leaderboardData = [];
 
-// Demo data (replace later with DB/MySQL)
-let leaderboardData = [
-  { name: "Player 1", best: 3126 },
-  { name: "Player 2", best: 2864 },
-  { name: "Player 3", best: 2021 },
-  { name: "Player 4", best: 1796 },
-  { name: "Player 5", best: 1642 },
-  { name: "Player 6", best: 1627 },
-  { name: "Player 7", best: 1555 }
-];
+// Fetch leaderboard data from backend
+async function fetchLeaderboard() {
+  try {
+    const response = await fetch('/api/leaderboard');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    leaderboardData = data;
+    renderLeaderboard();
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    // Show error message in leaderboard panel
+    if (leaderboardList) {
+      leaderboardList.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: #999;">
+          Failed to load leaderboard data.
+        </div>
+      `;
+    }
+  }
+}
 
 function renderLeaderboard() {
   if (!leaderboardList) return;
 
-  const data = [...leaderboardData].sort((a, b) => b.best - a.best).slice(0, 10);
+  if (leaderboardData.length === 0) {
+    leaderboardList.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #999;">
+        No leaderboard data available.
+      </div>
+    `;
+    return;
+  }
+
+  const data = [...leaderboardData].slice(0, 10);
 
   leaderboardList.innerHTML = data
     .map((row, i) => {
@@ -63,6 +86,10 @@ if (leaderboardBtn && leaderboardPanel) {
   leaderboardBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     leaderboardPanel.classList.toggle("hidden");
+    // Refresh leaderboard data when opening the panel
+    if (!leaderboardPanel.classList.contains("hidden")) {
+      fetchLeaderboard();
+    }
   });
 
   leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
@@ -262,7 +289,7 @@ window.addEventListener("load", () => {
   }
 
   hidePanelsOnStart();
-  renderLeaderboard();
+  fetchLeaderboard(); // Fetch leaderboard from backend on page load
   updateScoreLabels();
   updateTurnText();
   updateScoreboard();
