@@ -22,7 +22,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('tic-tac-toe/tempdir/Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('tic-tac-toe/Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # Used latest version v6.18.0
         with:
           context: ./tic-tac-toe
-          file: ./tic-tac-toe/tempdir/Dockerfile
+          file: ./tic-tac-toe/Dockerfile
           push: false
           tags: tttapp:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
