@@ -115,7 +115,7 @@ def add_score():
             else:
                 message = f"Score not updated. Current best: {existing_player['best_score']}"
         else:
-            # Inserting a new player into the database
+            # Inserting a new player into the scoreboard database 
             insert_query = "INSERT INTO leaderboard (name, best_score) VALUES (%s, %s)"
             cursor.execute(insert_query, (player_name, score))
             connection.commit()
