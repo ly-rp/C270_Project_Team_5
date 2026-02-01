@@ -57,7 +57,11 @@ async function submitScore(score) {
       console.log(result.message);
       await fetchLeaderboard();
     } else {
-      console.error("Failed to submit score");
+      console.error(
+        "Failed to submit score. Status:", 
+        response.status, 
+        response.statusText
+      );
     }
   } catch (error) {
     console.error("Error submitting score:", error);
