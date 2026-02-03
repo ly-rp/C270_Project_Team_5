@@ -10,7 +10,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 3z
       update_config:
         parallelism: 1
         order: start-first
